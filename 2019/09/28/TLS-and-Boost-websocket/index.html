@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+  <!DOCTYPE html>
+<html lang="en">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  
+  <title>TLS and Boost websocket - Bingyang</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  
+  <meta name="keywords" content="TLS">
+  
+  
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=1.02">
+  
+  
+    <link rel="alternate" href="/atom.xml " title="Bingyang" type="application/atom+xml">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+</head></html>
+  <body>
+    <div class="container">
+      <header class="header">
+  <div class="blog-title">
+    <a href="/" class="logo">Bingyang</a>
+    <div class="subtitle">总有人把你推向阳光</div>
+  </div>
+  <nav class="navbar">
+    <ul class="menu">
+      
+        <li class="menu-item">
+          <a href="/" class="menu-item-link">Home</a>
+        </li>
+      
+        <li class="menu-item">
+          <a href="/archives" class="menu-item-link">Archives</a>
+        </li>
+      
+        <li class="menu-item">
+          <a href="/about" class="menu-item-link">About</a>
+        </li>
+      
+    </ul>
+  </nav>
+</header>
+<article class="post">
+  <div class="post-title">
+    <h1 class="article-title">TLS and Boost websocket</h1>
+  </div>
+   <div class="post-meta">
+    <span class="post-time">2019-09-28</span>
+  </div>
+  <div class="post-content">
+    <h3 id="TLS-Process"><a href="#TLS-Process" class="headerlink" title="TLS Process"></a>TLS Process</h3><p>My current project is dealing with boost websocket and tls protocol. Currently, our company use boost websocket(ws) to build connection between client and server. Client will send frame registration/request to server and server will send result/frame back. When I took it over, the websocket library I our company does not implement tls verification for ws and I need to finish this feature.</p>
+<p>No matter what protocol websocket or http we use for communication, we send message through the network. Without an encryption, all the messages are plaintext. A man in middle can hack the message and get the information, credit card info, account and password, etc.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Client                                     Server</span><br><span class="line">   |           username password             |</span><br><span class="line">   |          -------------------&gt;           |</span><br><span class="line">   |                                         |</span><br><span class="line">   |                                         |</span><br></pre></td></tr></table></figure>
+<p>We definitely do not want to send plaintext through the network. Man in the middle(MITM) can attack easily. Any one in the network can see this message. So the first thought is to encrypt the message. </p>
+<p>For the encryption, symmetric cryptographic algorithm provides one key. Both encryption and decryption use the same key.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">F(key, data) = ciphertext</span><br><span class="line">F&apos;(key, ciphertext) = data</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Client                                     Server</span><br><span class="line">   |PK         OIUA(W&amp;*@!NA&lt;&gt;SDH             | PK</span><br><span class="line">   |          -------------------&gt;           |</span><br><span class="line">   |                                         |</span><br><span class="line">   |                                         |</span><br></pre></td></tr></table></figure>
+<p>The most widely used algorithm of symmetric encryption is called AES. The pros of this is that it is fast and it is good to encrypted large data. However, it is hard to determine the key between client and server. Whether client send key to server, or server send the key to client. MITM can get the key and hack the connection. Encryption will become meaningless.</p>
+<p>Here we have asymmetric encryption. For asymmetric encryption, it will generate two keys, one is called public key, another one is called private key. Any info encrypted by one of them can only get decrypted by the another key.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">F(Pk1, data) = ciphertext</span><br><span class="line">F&apos;(Pk2, ciphertext) = data</span><br><span class="line">F(Pk2, data) = ciphertext</span><br><span class="line">F&apos;(Pk1, ciphertext) = data</span><br></pre></td></tr></table></figure>
+<p>Now the message between client and server will be like this<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Client                                     Server</span><br><span class="line">   |Public key      OIUA(W&amp;*@!NA&lt;&gt;SDH        | Private key</span><br><span class="line">   |              -------------------&gt;       |</span><br><span class="line">   |               UIA*(&amp;&amp;*QJKASDKKAS        |</span><br><span class="line">   |              &lt;-------------------       |</span><br></pre></td></tr></table></figure></p>
+<p>On client side, we use the public key to encrypt the message then send it to server. Private key will only kept by server. The message which is encrypted by the public key can only decrypted by private key. If MITM intercepts the message, he does not have the private key, so he can not decrypted message. It seems to work fine. There are problems. </p>
+<ul>
+<li>the process of asymmetric encryption and decryption are slow.</li>
+</ul>
+<p>What’s more, there are two security problem</p>
+<ul>
+<li>MITM can have the public key and is able to decrypt the message from server to client</li>
+<li>It can not guarantee that the public key for client is from the server not MITM</li>
+</ul>
+<p>Let’s solve this one by one. For the disadvantage of asymmetric encryption and public key exposure we can combine the symmetric encryption and asymmetric encryption.</p>
+<ol>
+<li>After connection established, client will ask for public key</li>
+<li>Server sends public key to the client</li>
+<li>Client generates a random number P encrypted by public key and sends it to the server</li>
+<li>Server will decrypt the number P and confirm the P will be the key for symmetric encryption</li>
+<li>The following messages will be symmetric encrypted by this number P</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">Client                                     Server</span><br><span class="line">   |               ask for public key        | ---</span><br><span class="line">   |              -------------------&gt;       |   |</span><br><span class="line">   |               send public key           |   |</span><br><span class="line">   |              &lt;-------------------       |   | --&gt; asymmetric encryption</span><br><span class="line">   |                send num P as key        |   |</span><br><span class="line">   |              -------------------&gt;       |   |</span><br><span class="line">   |   confirm P as symmetric encryption key |   |</span><br><span class="line">   |              &lt;-------------------       | ---</span><br><span class="line">   |PK              OIUA(W&amp;*@!NA&lt;&gt;SDH        | PK</span><br><span class="line">   |               -------------------&gt;      |</span><br></pre></td></tr></table></figure>
+<p>So Even though MITM gets the message he does not know the newly generated key for symmetric encryption by the client. He can not decrypt the message. But the second problem still not get fixed. How about the MITM get the very first message asking for public key after the connection established.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Client                    MITM                   Server</span><br><span class="line">   |  ask for public key   |  ask for public key   |</span><br><span class="line">   | -------------------&gt;  | -------------------&gt;  |</span><br><span class="line">   |  send fake public key |  send public key      |</span><br><span class="line">   |  &lt;------------------- | &lt;-------------------  | </span><br><span class="line">   |  send num P as key    |  send num P as key    |</span><br><span class="line">   |  -------------------&gt; | -------------------&gt;  |</span><br><span class="line">   | confirm P as the key  | confirm P as the key  |</span><br><span class="line">   | &lt;-------------------  | &lt;-------------------  |</span><br></pre></td></tr></table></figure></p>
+<p>If the MITM get the first message and send a fake public key to trick the client he is the server. Now we have a license to solve this problem. It is called Certification Authority(CA).</p>
+<p>In the whole internet, all users will admit some authorized institutions, like Microsoft, Google. They will be considered as Root Authority so every browser will be embedded with these institutions’ public key. You won’t have any authority issue with these public keys when you install your browser.</p>
+<p>When server apply for a license with all company information, the institution will review the information. After the review, institution will generate two keys, one is public key another is private key and a CA license. Private key will kept by the server.</p>
+<p>CA license has all company info and the server public key. And hash algorithm will be used to generate a hash value which is called digest. Institution will use its private key to encrypt the digest as a signature. The signature will append to the end of the CA.</p>
+<p>The process will be</p>
+<ol>
+<li>Instead of asking for public key after connection, client will ask for CA license.</li>
+<li>Server sends CA license to the client</li>
+<li>Client will check the CA and find the Root institution public key from embedded keys in browser.</li>
+<li>Use the Root authority public key decrypt signature to get the digest</li>
+<li>Do hash calculation of CA info to get a digest</li>
+<li>Compare these two digests (hash value), if they match the public key in CA is authorized</li>
+</ol>
+<p>Even if MITM changed the license, he does not have the Root authority private key to encrypt the CA. The client will know it. So for now, we have solved the potential security problems. The entire process will be </p>
+<ol>
+<li>Client -&gt; Server. SSL version, asymmetric encryption algorithm, random number 1 (Client Hello)</li>
+<li>Server -&gt; Client. Confirm SSL version, symmetric encryption algorithm, random number 2, CA license (Server Hello, Server Certificate, Server Hello Done)</li>
+<li>Client checks CA license</li>
+<li>Client -&gt; Server. Pre-master number (Client Key exchange, Client Certificate*)</li>
+<li>Client, Server use three numbers to generate symmetric encryption key</li>
+<li>Client -&gt; Server. Confirm symmetric encryption key and test message (Change Cipher Spec, Encrypted Handshake Message)</li>
+<li>Server -&gt; Client. Confirm symmetric encryption key and test message (Change Cipher Spec, Encrypted Handshake Message)</li>
+</ol>
+<h3 id="Boost-Library"><a href="#Boost-Library" class="headerlink" title="Boost Library"></a>Boost Library</h3><p>We use boost.beast library and follow <a href="https://www.boost.org/doc/libs/1_66_0/libs/beast/doc/html/beast/examples.html" target="_blank" rel="noopener">async websocket example</a> 1_66_0 version to build our own websocket library. And I also found a very simple <a href="https://github.com/AdamMagaluk/asio-ssl-mutual-auth" target="_blank" rel="noopener">server echo example</a> used boost.beast. I played with this code to have a better understanding of beast library.</p>
+<p>When you are trying to use this server echo example, there are some compile error need to be fixed.</p>
+<p>initialization of io_context should be updated like<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">boost::asio::ssl::<span class="function">context <span class="title">ctx</span><span class="params">(boost::asio::ssl::context::sslv23)</span></span>;</span><br></pre></td></tr></table></figure></p>
+<p>and also for dh512.pem is small. Should use dh1024.pem instead.</p>
+<p>When I take over this work, the current websocket we built not implemented SSL. This is not hard to implement. Follow the async example in the boost.beast website and load the key and certificate will be fine. However there are two problems I want to address. I spent lots of time to figure them out.</p>
+<p>First, some messages I sent to server are broken. Before I implemented SSL, it worked fine. Then I add TLS on websocket, and made server keep sending same messages to client. One or two messages can not get parsed by protobuf. </p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">sendMessage( <span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">string</span>&amp; serializedMessage )</span><br><span class="line">&#123;</span><br><span class="line">    ...</span><br><span class="line">    _webSocket.async_write(</span><br><span class="line">            boost::asio::buffer( serializedMessage ),</span><br><span class="line">            <span class="built_in">std</span>::bind(</span><br><span class="line">                    &amp;Session::onWrite,</span><br><span class="line">                    <span class="keyword">this</span>-&gt;shared_from_this(),</span><br><span class="line">                    <span class="built_in">std</span>::placeholders::_1,</span><br><span class="line">                    <span class="built_in">std</span>::placeholders::_2 ) );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>I did not control the lifetime of the <code>serializedMessage</code> string parameter extends until the <code>async_write</code> operation is complete, which means <code>async_write</code> was still waiting while <code>sendMessage</code> function already finished. <code>serializedMessage</code> will be released but <code>async_write</code> was not completed. You can check the <a href="https://github.com/boostorg/beast/issues/1707" target="_blank" rel="noopener">issue</a> I raised in Github, the author gave me a explanation in detail.</p>
+<p>The second problem is that websocket reconnection. In our requirements, if the connection is not established, client should retry connect every few seconds. We followed the 1_66_0 boost.beast websocket example.<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">std</span>::make_shared&lt;session&gt;(ioc)-&gt;run(host, port, text);</span><br></pre></td></tr></table></figure></p>
+<p>The old solution is that we have a shared pointer pointing to the session, so every time we want to reconnect we reset the pointer and make a new session to run again. This seems works fine. After I let my client running all night trying to reconnect every few seconds. The client crashed several times every around 6 hours. Resource runs out exception. I used <code>pgrep</code> and <code>ps -T -p</code> to check the task. It created so many client session tasks.</p>
+<p>The reason is that it is a shared pointer and in session it has operations like<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ws_.async_handshake(host_, <span class="string">"/"</span>,</span><br><span class="line">    <span class="built_in">std</span>::bind(</span><br><span class="line">        &amp;session::on_handshake,</span><br><span class="line">        shared_from_this(),</span><br><span class="line">        <span class="built_in">std</span>::placeholders::_1));</span><br></pre></td></tr></table></figure></p>
+<p>The client session will point to itself. Even though you reset the shared pointer, the dead client session task will not get released.</p>
+<p>So for reconnection, <code>asio::ssl::stream</code> can be used again after being closed. Instead of recreating client session, you need to close the dead ssl connection and create a new <code>boost::asio::ip::tcp::socket</code> each time you reconnect.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">_ws-&gt;lowest_layer().close();</span><br><span class="line">_ws.reset(new WebSocket(_ioContext, _sslContext));</span><br></pre></td></tr></table></figure>
+<p>This is not enough, the io_context will get returned if all the handler returned. Even though you have a new recreation. There are two solutions I listed <a href="https://github.com/boostorg/beast/issues/1747" target="_blank" rel="noopener">here</a>. You can either set a work guide for the io_conetxt or use a callback timer inside the websocket connection so that the handler can not finish working.</p>
+
+  </div>
+  <div class="post-footer">
+    
+      <ul class="post-tag-list"><li class="post-tag-list-item"><a class="post-tag-list-link" href="/tags/TLS/">TLS</a></li></ul>
+    
+
+    <a href="#top" class="top">Back to Top</a>
+  </div>
+</article>
+<footer>
+  &copy; 2020
+  <span class="author">
+    Bingyang Liu
+  </span>
+</footer>
+    </div>
+  </body>
+</html>

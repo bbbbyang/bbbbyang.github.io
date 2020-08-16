@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+  <!DOCTYPE html>
+<html lang="en">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  
+  <title>OAuth 2.0 - Bingyang</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  
+  <meta name="keywords" content="OAuth">
+  
+  
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=1.02">
+  
+  
+    <link rel="alternate" href="/atom.xml " title="Bingyang" type="application/atom+xml">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+</head></html>
+  <body>
+    <div class="container">
+      <header class="header">
+  <div class="blog-title">
+    <a href="/" class="logo">Bingyang</a>
+    <div class="subtitle">总有人把你推向阳光</div>
+  </div>
+  <nav class="navbar">
+    <ul class="menu">
+      
+        <li class="menu-item">
+          <a href="/" class="menu-item-link">Home</a>
+        </li>
+      
+        <li class="menu-item">
+          <a href="/archives" class="menu-item-link">Archives</a>
+        </li>
+      
+        <li class="menu-item">
+          <a href="/about" class="menu-item-link">About</a>
+        </li>
+      
+    </ul>
+  </nav>
+</header>
+<article class="post">
+  <div class="post-title">
+    <h1 class="article-title">OAuth 2.0</h1>
+  </div>
+   <div class="post-meta">
+    <span class="post-time">2018-11-15</span>
+  </div>
+  <div class="post-content">
+    <p>Many Apps support third party login, like Facebook, Wechat, Dribbble etc. When we develop an app that need to support this feature, we need to know about OAuth protocol.</p>
+<blockquote>
+<p>OAuth official website<br>OAuth 2.0 is the industry-standard protocol for authorization. OAuth 2.0 focuses on client developer simplicity while providing specific authorization flows for web applications, desktop application, mobile phones and living room devices.</p>
+</blockquote>
+<p>Why we need OAuth protocol?<br>Usually, if we want to get protected resource, the client needs to send user authorization certificate to server, such as username and password. For example, if user login official facebook or dribbble client to get shots, it is safe to send username and password. What if the third app want to get the these protected shots?</p>
+<blockquote>
+<p>Thrid app -&gt; Server : Can I get protected resource?<br>Server -&gt; Third app : Sure. I need username and password first.<br>Third app -&gt; User : Can I get your username and password?<br>User -&gt; Third add : No!!!<br>Third app : Whatever, I will do it myself.</p>
+</blockquote>
+<p>So let’s use a dribbble shots api to get picture shots. In chrome, we can make a simple get request</p>
+<blockquote>
+<p>GET<br><a href="https://api.dribbble.com/v1/shots" target="_blank" rel="noopener">https://api.dribbble.com/v1/shots</a></p>
+</blockquote>
+<p>What we get is<br><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">"message"</span>: <span class="string">"Bad credentials."</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>Just like other services, the server needs user cerdential in order to fetch protected data. That is where OAuth comes into play.</p>
+<p>OAuth protocol define four main characters:</p>
+<ol>
+<li>Resource owner: the owner of the resource, usually called end-user.</li>
+<li>Resource server: the server of the protected data, client can get data based on access Token.</li>
+<li>Client: represent user to get protected resource, any application.</li>
+<li>Authorization server: authorize client access Token.</li>
+</ol>
+<p>OAuth 2.0 process can be described by the following diagram.<br><img src="https://st.deepzz.com/blog/img/oauth2-roles.jpg" alt></p>
+<ul>
+<li>Client send request to resource owner for credential authorization. This request can be sent by authorization server.</li>
+<li>If the end-user authorize the request, the application receives an authorization grant. This will represent resource owner.</li>
+<li>The application requests an access token from the authorization server.</li>
+<li>If the application identity is authenticated and the authorization grant is valid, the authorization server issues an access Token to the application.</li>
+<li>Client/Application request the resource from resource server by access Token.</li>
+<li>Check the access Token and send protected resource to the client.</li>
+</ul>
+<p>This flow is the general process of OAuth 2.0 protocol. Let’s do it with Dribbble example. Here is the details of instruction <code>Authorization Code Mode</code>: <a href="http://developer.dribbble.com/v1/oauth/" target="_blank" rel="noopener">http://developer.dribbble.com/v1/oauth/</a></p>
+<p>First, if a client wants to get authroized, it must be registered with the service. You need to define a callback URL which is the service will redirect the user after they authorize the request. The service will provide credentails which are client ID (public) and client secret (private).</p>
+<ol>
+<li>Client direct user to Authorization Server with client ID, scope, redirect uri.</li>
+<li>Authorization server check the validation of the client and ask user authentication.</li>
+<li>If user authorize the request, authorization server will redirect user-agent to callback uri long with an authorization code.</li>
+<li>After Client gets code, send code, client ID and client secret to authorization server to get access Token. (Server will valid client and also code.)</li>
+<li>Client use access Token to ask for protected resource.</li>
+</ol>
+<p>Here is the Dribbble authorization address.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GET https://dribbble.com/oauth/authorize</span><br></pre></td></tr></table></figure></p>
+<p>And we create a GET request<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> String <span class="title">getAuthorizeUrl</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    String url = Uri.parse(URI_AUTHORIZE)</span><br><span class="line">                    .buildUpon()</span><br><span class="line">                    .appendQueryParameter(KEY_CLIENT_ID, CLIENT_ID)</span><br><span class="line">                    .build()</span><br><span class="line">                    .toString();</span><br><span class="line">    url += <span class="string">"&amp;"</span> + KEY_REDIRECT_URL + <span class="string">"="</span> + REDIRECT_URI;</span><br><span class="line">    url += <span class="string">"&amp;"</span> + KEY_SCOPE + <span class="string">"="</span> + SCOPE;</span><br><span class="line">    <span class="keyword">return</span> url;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>The reason why I use <code>+=</code> to add url and scope because when we use <code>appendQueryParameter</code> it will add some character into our url, something like<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">redirect_uri=http://www.dribbbo.com&amp;scope=public+write</span><br><span class="line">redirect_uri=http%3A%2F%2Fwww.dribbbo.com&amp;scope=public%2Bwrite</span><br></pre></td></tr></table></figure></p>
+<p>You can try this url directly in your web browser. The address will immediatelly change from A to B.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">A: https://dribbble.com/oauth/authorize?client_id=&lt;client_id&gt;&amp;redirect_url=&lt;redirect_url&gt;&amp;scope=&lt;scope&gt;</span><br><span class="line">B: http://www.dribbbo.com/?code=&lt;code&gt;</span><br></pre></td></tr></table></figure></p>
+<p>In the Authorization activity, we set a webView and load this url. As the url will get changed, we can use <code>shouldOverrideUrlLoading</code> to catch new url and get the code.<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">webView.setWebViewClient(<span class="keyword">new</span> WebViewClient()&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">shouldOverrideUrlLoading</span><span class="params">(WebView view, String url)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(url.startsWith(Auth.REDIRECT_URI)) &#123;</span><br><span class="line">            Uri uri = Uri.parse(url);</span><br><span class="line">            Intent intent = <span class="keyword">new</span> Intent();</span><br><span class="line">            intent.putExtra(KEY_CODE, uri.getQueryParameter(KEY_CODE));</span><br><span class="line">            setResult(Activity.RESULT_OK, intent);</span><br><span class="line">            finish();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">super</span>.shouldOverrideUrlLoading(view, url);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>Now we get authorization code. Next step is to fetch access token. Exchange address is<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">POST https://dribbble.com/oauth/token</span><br><span class="line">with client_id, client_secret, code</span><br></pre></td></tr></table></figure></p>
+<p>Here is the code to send post request to get access token.<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">OkHttpClient client = <span class="keyword">new</span> OkHttpClient();</span><br><span class="line">RequestBody requestBody = <span class="keyword">new</span> FormBody.Builder()</span><br><span class="line">                                        .add(KEY_CLIENT_ID, CLIENT_ID)</span><br><span class="line">                                        .add(KEY_CLIENT_SECRET, CLIENT_SECRET)</span><br><span class="line">                                        .add(KEY_CODE, authCode)</span><br><span class="line">                                        .add(KEY_REDIRECT_URL, REDIRECT_URI)</span><br><span class="line">                                        .build();</span><br><span class="line">Request request = <span class="keyword">new</span> Request.Builder()</span><br><span class="line">                            .url(URI_TOKEN)</span><br><span class="line">                            .post(requestBody)</span><br><span class="line">                            .build();</span><br><span class="line">Response response = client.newCall(request).execute();</span><br></pre></td></tr></table></figure></p>
+<p>You can try curl to get Dribbble response<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl --data &quot;client_id=&lt;ID&gt;&amp;client_secret=&lt;SECRET&gt;&amp;code=&lt;CODE&gt;&amp;redirect_uri=&lt;CALLBACKURL&gt;&quot; https://dribbble.com/oauth/token</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">"access_token"</span> : <span class="string">"********"</span>,</span><br><span class="line">    <span class="attr">"token_type"</span> : <span class="string">"bearer"</span>,</span><br><span class="line">    <span class="attr">"scope"</span> : <span class="string">"public write"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>We can create a JSONObject to get access token. After we get the token, we can use this token along with API to ask for data.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -H &quot;Authorization: Bearer &lt;ACCESS_TOKEN&gt;&quot; https://api.dribbble.com/v2/user</span><br></pre></td></tr></table></figure></p>
+<p>This is basically how OAuth 2.0 Authorization Code works. When I first time tried to understand this process, I wonder why they can not just return access token first time. Why the protocol needs to send code first, then exchange for token?</p>
+<p>Here we should bring up difference between user-agent and client.</p>
+<ul>
+<li>User-agent is like front-end (browser), user use it to communicate with server.</li>
+<li>Client is the part asks to access the protected resource.</li>
+</ul>
+<p>So when authorization server transmits of the access token directly to the user-agent, usually a browser, Potentially exposing it to others, including the resource owner (As I said above to try the get code request in browser). However, in authorization code mode, it sends code to user-agent, server will get it and next steps will be a server-to-server process. Access token and client secret will never get exposed. These applications have the decoupled user-agent and client (separate ui and server).</p>
+<p>If the user-agent and the client are coupled, like in-browser javascript application or native mobile app. It won’t need this code to get access. The token and client secret will still be shared with resource owner. The code and client secret just make the flow more complex without adding any more real security. That was when I implemented facebook login in my <a href="https://github.com/bbbbyang/Shopping" target="_blank" rel="noopener">Shopping app</a>, the <a href="https://developers.facebook.com/docs/facebook-login/android/" target="_blank" rel="noopener">facebook android developer</a> tutorial did not give me the instructions for authorization code and client secret. It only provides token to make graph request. This process directly returning access token is called implicit authorization.</p>
+
+  </div>
+  <div class="post-footer">
+    
+      <ul class="post-tag-list"><li class="post-tag-list-item"><a class="post-tag-list-link" href="/tags/OAuth/">OAuth</a></li></ul>
+    
+
+    <a href="#top" class="top">Back to Top</a>
+  </div>
+</article>
+<footer>
+  &copy; 2020
+  <span class="author">
+    Bingyang Liu
+  </span>
+</footer>
+    </div>
+  </body>
+</html>

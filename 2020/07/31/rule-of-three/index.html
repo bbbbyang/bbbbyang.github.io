@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+  <!DOCTYPE html>
+<html lang="en">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  
+  <title>The Rule of Three - Bingyang</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  
+  <meta name="keywords" content="Deep" copy>
+  
+  
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=1.02">
+  
+  
+    <link rel="alternate" href="/atom.xml " title="Bingyang" type="application/atom+xml">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+</head></html>
+  <body>
+    <div class="container">
+      <header class="header">
+  <div class="blog-title">
+    <a href="/" class="logo">Bingyang</a>
+    <div class="subtitle">总有人把你推向阳光</div>
+  </div>
+  <nav class="navbar">
+    <ul class="menu">
+      
+        <li class="menu-item">
+          <a href="/" class="menu-item-link">Home</a>
+        </li>
+      
+        <li class="menu-item">
+          <a href="/archives" class="menu-item-link">Archives</a>
+        </li>
+      
+        <li class="menu-item">
+          <a href="/about" class="menu-item-link">About</a>
+        </li>
+      
+    </ul>
+  </nav>
+</header>
+<article class="post">
+  <div class="post-title">
+    <h1 class="article-title">The Rule of Three</h1>
+  </div>
+   <div class="post-meta">
+    <span class="post-time">2020-07-31</span>
+  </div>
+  <div class="post-content">
+    <p>Once I saw a comment about C++, said that if you want to check whether the programmer is experienced or not, check if he properly handled or disabled copy constructor or assign operator if he has a destructor or delete resource. I never notice this before. The essential idea of this comment is the rule of three.</p>
+<blockquote>
+<p>If a class requires a user-defined destructor, a user-defined copy constructor, or a user-defined copy assignment operator, it almost certainly requires all three.</p>
+</blockquote>
+<h5 id="Constructor-and-Destructor"><a href="#Constructor-and-Destructor" class="headerlink" title="Constructor and Destructor"></a>Constructor and Destructor</h5><p>There are three casese that copy constructor will be called which means object will be the initial value for another object.</p>
+<ol>
+<li>A aa = a;</li>
+<li>f(A a)</li>
+<li>return a;</li>
+</ol>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Class A &#123;</span><br><span class="line">    <span class="keyword">public</span>:</span><br><span class="line">        A( <span class="keyword">int</span> size );</span><br><span class="line">        <span class="keyword">int</span> size;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>If class <code>A</code> has been defined with a copy constructor like <code>A( const&amp; A a)</code>, it mostly will call this one. What if we do not have the copy constructor? The C++ will follow default memberwise initialization rule, which means copy the data member recursively.</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">A <span class="title">a</span><span class="params">( <span class="number">5</span> )</span></span>;</span><br><span class="line">A copy = a;</span><br><span class="line"><span class="comment">// no copy constructor, it will be equal to</span></span><br><span class="line">copy.len = a.len;</span><br></pre></td></tr></table></figure>
+<p>Copy constructor will copy the value one by one like the last line. If we have a pointer in our class, we need to deal the memory manually. In constructor, we need to apply for memory and in destructor we need to free this memory. This class will be like below.</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">Class A &#123;</span><br><span class="line">    <span class="keyword">public</span>:</span><br><span class="line">        A( <span class="keyword">int</span> size ) &#123;</span><br><span class="line">            data = <span class="keyword">new</span> <span class="keyword">int</span>[size];</span><br><span class="line">        &#125;</span><br><span class="line">        ~A() &#123;</span><br><span class="line">            <span class="keyword">delete</span>[] data;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">int</span> size;</span><br><span class="line">        <span class="keyword">int</span>* data;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="Shallow-Copy-and-Deep-Copy"><a href="#Shallow-Copy-and-Deep-Copy" class="headerlink" title="Shallow Copy and Deep Copy"></a>Shallow Copy and Deep Copy</h5><p>Now since we have a pointer in our class, we need to manually free the memory so we have a customized destructor to handle that. What if we do not obey the rule of three, that we do not set up a customized copy constructor and override assign operator. When we assign an object to another object, the C++ compiler will call its default copy constructor. Initilize the data member recursively.<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">A <span class="title">a</span><span class="params">( <span class="number">5</span> )</span></span>;</span><br><span class="line">A copy = a;</span><br><span class="line"><span class="comment">// no copy constructor, it will be equal to</span></span><br><span class="line">copy.data = a.data;</span><br><span class="line">copy.len = a.len;</span><br></pre></td></tr></table></figure></p>
+<p>However, this copy process is <em>Shallow Copy</em>, it is only copy the value of each data member. This will cause memory leak. Pointer <code>copy.data</code> and <code>A.data</code> pointing to the same chunk of memory. When we release object A, destructor of A will free this memory, after that we release object copy, the same chunk of memory will be freed again. Default copy constructor is shallow copy and it will cause memory leak problem.</p>
+<p>In order to solve this, we need <em>Deep Copy</em>. Now we setup a customized copy constructor<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">A(<span class="keyword">const</span> A&amp; a) :</span><br><span class="line">&#123;</span><br><span class="line">    size = a.size</span><br><span class="line">	data = <span class="keyword">new</span> <span class="keyword">int</span>[size];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>In our copy constructor, we use deep copy, which apply for a new memory for its own pointer. When release each object, the destructor will only free the memory this object applied. Now we can see the difference of <em>Shallow Copy</em> and <em>Deep Copy</em>. </p>
+<p>This also explain for the rule of three. When we have a customized destructor, that means we need to handle the memory free for the pointer. If we do not obey the rule, the default copy contructor will have a shallow copy. Rule of three force us to have a deep copy.</p>
+
+  </div>
+  <div class="post-footer">
+    
+      <ul class="post-tag-list"><li class="post-tag-list-item"><a class="post-tag-list-link" href="/tags/Deep-copy/">Deep copy</a></li></ul>
+    
+
+    <a href="#top" class="top">Back to Top</a>
+  </div>
+</article>
+<footer>
+  &copy; 2020
+  <span class="author">
+    Bingyang Liu
+  </span>
+</footer>
+    </div>
+  </body>
+</html>

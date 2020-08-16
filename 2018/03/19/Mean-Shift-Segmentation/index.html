@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+  <!DOCTYPE html>
+<html lang="en">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  
+  <title>Mean Shift Segmentation - Bingyang</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  
+  <meta name="keywords" content="Mean" shift>
+  
+  
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=1.02">
+  
+  
+    <link rel="alternate" href="/atom.xml " title="Bingyang" type="application/atom+xml">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+</head></html>
+  <body>
+    <div class="container">
+      <header class="header">
+  <div class="blog-title">
+    <a href="/" class="logo">Bingyang</a>
+    <div class="subtitle">总有人把你推向阳光</div>
+  </div>
+  <nav class="navbar">
+    <ul class="menu">
+      
+        <li class="menu-item">
+          <a href="/" class="menu-item-link">Home</a>
+        </li>
+      
+        <li class="menu-item">
+          <a href="/archives" class="menu-item-link">Archives</a>
+        </li>
+      
+        <li class="menu-item">
+          <a href="/about" class="menu-item-link">About</a>
+        </li>
+      
+    </ul>
+  </nav>
+</header>
+<article class="post">
+  <div class="post-title">
+    <h1 class="article-title">Mean Shift Segmentation</h1>
+  </div>
+   <div class="post-meta">
+    <span class="post-time">2018-03-19</span>
+  </div>
+  <div class="post-content">
+    <p><a href="https://courses.csail.mit.edu/6.869/handouts/PAMIMeanshift.pdf" target="_blank" rel="noopener">Mean Shift</a> algorithm is the first image analysis research I did in my graduate study in 2015. It is usually used as image segmentation or tracking algorithm. This blog will start with the principle of mean shift and its image segmentation application.</p>
+<h4 id="Non-Parametic-Density-Estimation"><a href="#Non-Parametic-Density-Estimation" class="headerlink" title="Non-Parametic Density Estimation"></a>Non-Parametic Density Estimation</h4><p>This will give you the basic statics background and I won’t talk too much about this.</p>
+<p>If we have 6 data points -2.1, -1.3, -0.4, 1.9, 5.1, 6.2. Let’s draw the histogram. Set width of each bin as 2 and we can get following histogram (left one) (from wiki).</p>
+<p><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Comparison_of_1D_histogram_and_KDE.png/500px-Comparison_of_1D_histogram_and_KDE.png" alt></p>
+<p>That’s it, the basic non-parametic density estimation. From this histogram we can know the distribution probability of the points. However, it has some disadvantages. 1. It is not smooth. 2.It highly depends on the width of the bin and the start point. The calculation function for histogram is pretty simply. How can we change the function and make the histogram more smooth and stable? We should calculate the probability density of every point (right one).</p>
+<p><img src="http://images.cnitblog.com/blog/460184/201408/121402307484084.png" alt></p>
+<p>For 2D case here, how can we get the histogram of the red points? We should choose a circle instead of rectangle.</p>
+<p>Change the shape of the “bins” to a circle. We can simply count the number of the red points inside the circle and divided by the total number to get the density distribution <script type="math/tex">p = \frac{K}N</script>. If the circle is small enough, we can get <script type="math/tex">p = \frac{K}{NV}</script>. For high dimensional situation, the principle should be same. The histogram is the density estimation and the counting function is called kernel function.</p>
+<h4 id="Mean-Shift-Clustering"><a href="#Mean-Shift-Clustering" class="headerlink" title="Mean Shift Clustering"></a>Mean Shift Clustering</h4><p>The kernel function we choose is the uniform kernel. (We can choose other function of course.)</p>
+<script type="math/tex; mode=display">k(x)=\begin{cases}
+c&0 <= x <= 1\\\\
+0&otherwise\\\\
+\end{cases}</script><p>So we can get total number of K inside 0 to 1 for example, <script type="math/tex">K(0-1)=\sum k(x_n)</script>. For more general density function, that is (<script type="math/tex">h</script> is the general width instead of 0 to 1)</p>
+<script type="math/tex; mode=display">
+K(x)=c\sum_{n=1}^N{k(\frac{x-x_n}{h})}</script><p>And we have the density function <script type="math/tex">p = \frac{K}{NV}</script>. For high dimension,</p>
+<script type="math/tex; mode=display">
+p(x) = c\frac1{N}\sum_{n=1}^N\frac1{h^d}{k(\frac{x-x_n}{h})}</script><p>For any point, the density we can write as</p>
+<script type="math/tex; mode=display">
+p(x) = \frac{c}{Nh^d}\sum_{n=1}^N{k(||\frac{x-x_n}{h}||^2)}</script><p>Now we have density function, so we can easily get the gradient function.</p>
+<script type="math/tex; mode=display">
+\nabla{p(x)} = \frac{2c}{Nh^{d+2}}\sum_{n=1}^N(x_n-x)g(x)\\</script><p>We can think about this gradient function in this way. Every point <script type="math/tex">x</script> will have a force dragging the point and the the power of the force is <script type="math/tex">g(x)=-k'(||\frac{x_n-x}{h}||^2)</script>. This force is combined from the forces that every other point give to the point <script type="math/tex">x</script>.We can use this function to find the new position. The <script type="math/tex">g(x)</script> is also a kernel function stands for the <script type="math/tex">g(x)</script> density at point <script type="math/tex">x</script>. If we use uniform kernel, the <script type="math/tex">g</script> density is the same with <script type="math/tex">p</script> density. So, we can derive the density function as</p>
+<script type="math/tex; mode=display">
+\nabla{p(x)} = \frac{c}{n}\sum_{n=1}^N{g(x)}[\frac{\sum_{n=1}^Nx_ng(x)}{\sum_{n=1}^Ng(x)}-x]</script><p>The third part of the function is the shift value, actually I think it is the shift direction, <script type="math/tex">\frac{\sum_{n=1}^Nx_ng(x)}{\sum_{n=1}^Ng(x)}</script>. So based on shift value, we have a new position for this point. Next what we need to do is to calculated shift value again based on new point until it will not move any more, which is called mode point. This is what we called adaptive step.</p>
+<h4 id="Mean-Shift-Filtering"><a href="#Mean-Shift-Filtering" class="headerlink" title="Mean Shift Filtering"></a>Mean Shift Filtering</h4><p>Mean clustering is to find the mode point. Every point need to find its mode point. For the feature space, every point will be considered as 5 dimensional point <script type="math/tex">[x, y, r, g, b]</script>. There will be 2 bandwidth for this 5D point, one in coordinator, one in RGB color space. We should separate these 2 bandwidth when calculate. </p>
+<p>For image filtering, we should set a maximum iteration number as 5 to find mode point. Based on <script type="math/tex">g(x)</script> and uniform kernel, it is easy to filter the point. Accumulate all point inside the bandwidth and divided by the totally number.</p>
+<script type="math/tex; mode=display">y^{s+1}=\frac{\sum^{N}_{n=1}x^s_n}N</script><p>Next step is to find which points are within the bandwidth. For easy computation, the coordinator feature space will be considered as rectangle for easy calculation. So the points will be calculated inside <script type="math/tex">(2h_s+1)</script> rectangle. This will satisfy the coordinator bandwidth. Next is in the color feature space. Color distance will be the criterion.</p>
+<script type="math/tex; mode=display">ColorDistance = (R_n-R_c)^2+(G_n-G_c)^2+(B_n-B_c)^2</script><p>The color distance should be less than color bandwidth. So now all points satisfy the two bandwidth are obtained. The final step is to use the formula above to get the next shift point. Remember the point is 5D point. 5 iteration or the point will not be changed in coordinator or in color space, that point is the mode point we want. And for easy calculation, we only give the color to the original point.</p>
+<h4 id="Mean-Shift-Segmentation-and-Regions-Merge"><a href="#Mean-Shift-Segmentation-and-Regions-Merge" class="headerlink" title="Mean Shift Segmentation and Regions Merge"></a>Mean Shift Segmentation and Regions Merge</h4><p>Flood fill algorithm and merge the small region.</p>
+<h4 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h4><p>Source Code : <a href="https://github.com/bbbbyang/Mean-Shift-Segmentation" target="_blank" rel="noopener">My Github</a></p>
+<p><a href="https://courses.csail.mit.edu/6.869/handouts/PAMIMeanshift.pdf" target="_blank" rel="noopener">Mean Shift Segmentation</a> should have three steps:</p>
+<ul>
+<li>Filtering (Mode Searching)</li>
+<li>Merge Similar Regions (Mode clustering)</li>
+<li>Merge Small Regions</li>
+</ul>
+<p>In the original paper, for step 2, when considered mode clustering, not only color similarity and also coordinate position should be within the bandwidth correspondingly. Here, we will only consider color factor to do segmentation.</p>
+<p>Filtering process is the main part of the algorithm.</p>
+<ul>
+<li>Determined the Uniform kernel for filtering.</li>
+<li>Based on one point<sup>1</sup>, within the space bandwidth, calculate every point color distance to the center point.</li>
+<li>For all points, which color distance is within the color bandwidth, calculate the shift vector<br>for the center point and add together<sup>2</sup>. </li>
+<li>Shift the center point. center = center + shift (include color).</li>
+<li>Repeat above steps and stop after 5 iterations or the center point doesn’t move.</li>
+<li>Assigned color to the original point the color. This original point belong to this cluster.</li>
+</ul>
+<p>1.Every point will be considered as 5-D point(R, G, B, x, y).</p>
+<p>2.Shift value is the average value of all points within the bandwidth.</p>
+<p>This code includes two functions.</p>
+<ul>
+<li>Filtering</li>
+<li>Segmentation</li>
+</ul>
+<p>Segmentation function is the Mean Shift Segmentation first two process, which has two parts, one is Mean Shift filtering and other one is flood filled algorithm (Region Growing).</p>
+<p><img src="https://raw.githubusercontent.com/bbbbyang/PictureRepository/e76a6e52ed0b61c4bbcc68df2f0c3d6898d4d8d2/Mean%20Shift/mandril_color256.jpg" alt><br><img src="https://raw.githubusercontent.com/bbbbyang/PictureRepository/e76a6e52ed0b61c4bbcc68df2f0c3d6898d4d8d2/Mean%20Shift/16-16Filtering.jpg" alt><br><img src="https://raw.githubusercontent.com/bbbbyang/PictureRepository/e76a6e52ed0b61c4bbcc68df2f0c3d6898d4d8d2/Mean%20Shift/16-16Segmentation.jpg" alt></p>
+<p><a href="https://courses.csail.mit.edu/6.869/handouts/PAMIMeanshift.pdf" target="_blank" rel="noopener">Mean Shift: A Robust Approach Toward Feature Space Analysis</a></p>
+<script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+  </div>
+  <div class="post-footer">
+    
+      <ul class="post-tag-list"><li class="post-tag-list-item"><a class="post-tag-list-link" href="/tags/Mean-Shift/">Mean Shift</a></li></ul>
+    
+
+    <a href="#top" class="top">Back to Top</a>
+  </div>
+</article>
+<footer>
+  &copy; 2020
+  <span class="author">
+    Bingyang Liu
+  </span>
+</footer>
+    </div>
+  </body>
+</html>

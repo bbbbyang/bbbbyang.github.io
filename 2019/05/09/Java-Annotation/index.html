@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+  <!DOCTYPE html>
+<html lang="en">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  
+  <title>Java Annotation - Bingyang</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  
+  <meta name="keywords" content="Annotation">
+  
+  
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=1.02">
+  
+  
+    <link rel="alternate" href="/atom.xml " title="Bingyang" type="application/atom+xml">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+</head></html>
+  <body>
+    <div class="container">
+      <header class="header">
+  <div class="blog-title">
+    <a href="/" class="logo">Bingyang</a>
+    <div class="subtitle">总有人把你推向阳光</div>
+  </div>
+  <nav class="navbar">
+    <ul class="menu">
+      
+        <li class="menu-item">
+          <a href="/" class="menu-item-link">Home</a>
+        </li>
+      
+        <li class="menu-item">
+          <a href="/archives" class="menu-item-link">Archives</a>
+        </li>
+      
+        <li class="menu-item">
+          <a href="/about" class="menu-item-link">About</a>
+        </li>
+      
+    </ul>
+  </nav>
+</header>
+<article class="post">
+  <div class="post-title">
+    <h1 class="article-title">Java Annotation</h1>
+  </div>
+   <div class="post-meta">
+    <span class="post-time">2019-05-09</span>
+  </div>
+  <div class="post-content">
+    <p>Recently, I am learning Spring framework. Spring framework is  based on annotation-driven development. I used to use annotation not often, just like <em>override</em>. For better understanding spring framework, I think I need to understand annotation development first.</p>
+<p>Annotation is a note for the function or varibale. If you search on Google about annotation, there are many tutorials about the definition of annotation in Java. Easy words, hard to understand how the annotation works. Here I will explain annotation development with an example in Android development of <a href="https://github.com/bbbbyang/NetworkListener/tree/Annotation-Network-Listener" target="_blank" rel="noopener">NetworkListener</a> ( switch to <em>Annotation-Network-Listener</em> branch).</p>
+<p>In our application, we want to catch the changes in network, network switching between wifi and mobile, or between connected and disconnected. The first thing to do is to define an enum type NetType</p>
+<h3 id="Define-an-Annotation"><a href="#Define-an-Annotation" class="headerlink" title="Define an Annotation"></a>Define an Annotation</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">enum</span> NetType &#123;</span><br><span class="line">    <span class="comment">// Connected With Wifi/GPRS</span></span><br><span class="line">    AUTO,</span><br><span class="line">    WIFI,</span><br><span class="line">    MOBILE,</span><br><span class="line">    <span class="comment">// No Internet</span></span><br><span class="line">    NONE</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>There are 4 states in network, WIFI, MOBILE and NONE are very straightforward. Why we have this AUTO? NetType is not only used for network type for the network connection, also used for which network type changes you want to listen. So AUTO means to listen all types of network change.</p>
+<p>Next we need to define the annotation.<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Target</span>(ElementType.METHOD)</span><br><span class="line"><span class="meta">@Retention</span>(RetentionPolicy.RUNTIME)</span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> Network &#123;</span><br><span class="line">    <span class="function">NetType <span class="title">netType</span><span class="params">()</span> <span class="keyword">default</span> NetType.AUTO</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>There are two annotations for our annotation. This is called meta-annotation. Meta-annotation is like a key word in Java, such as int, string, enum. It is how you define your annotation.</p>
+<ul>
+<li><em>@Target(ElementType.METHOD)</em> : our annotation should be defined on methods.</li>
+<li><em>@Retention(RetentionPolicy.RUNTIME)</em> : annotations are to be recorded in the class file by the compiler and retained by the VM at run time, so they may be read reflectively.</li>
+</ul>
+<p>I am not going to explain all the meta-annotation here. From the definition, it uses <em>@interface</em> to define an annotation, so we can see that annotation is kind of interface, which extends <code>java.lang.annotation.Annotation</code>. <code>netType()</code> is called attribute in annotation, while you can give it a default value. Java will generate an instance that implements this interface by dynamic proxy and then assigns the value to the attribute.</p>
+<h3 id="Use-the-Annotation"><a href="#Use-the-Annotation" class="headerlink" title="Use the Annotation"></a>Use the Annotation</h3><p>After we defined the annotation <em>Network</em>, now we need to use it. In our application, the <em>MainActivity</em> want to listen to the network changes. So we use annotation like this<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Network</span>(netType = NetType.AUTO)</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">network</span><span class="params">(NetType netType)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">switch</span> (netType) &#123;</span><br><span class="line">        <span class="keyword">case</span> WIFI:</span><br><span class="line">            Log.e(Constants.LOG_TAG, <span class="string">"WIFI"</span>);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> MOBILE:</span><br><span class="line">            Log.e(Constants.LOG_TAG, <span class="string">"MOBILE"</span>);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> NONE:</span><br><span class="line">            Log.e(Constants.LOG_TAG, <span class="string">"Network Disconnected"</span>);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>There are two <em>netType</em> here.</p>
+<ul>
+<li><code>public void network(NetType netType)</code> <em>netType</em> is what kind of network connection type is for the device.</li>
+<li><code>@Network(netType = NetType.AUTO)</code> <em>netType</em> is what kind of network changes you want to listen. If you change it to NetType.WIFI which means this function only listeners to WIFI changes.</li>
+</ul>
+<h3 id="Track-the-Annotation"><a href="#Track-the-Annotation" class="headerlink" title="Track the Annotation"></a>Track the Annotation</h3><p>For network changes, we will define a broadcast receiver to catch the network changed broadcasting. Also Receiver needs to know which function in which activity want to know about this. First we need to pass the <em>MainActivity</em> to the receiver. We have a registerObserver function to handle this.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">registerObserver</span><span class="params">(Object register)</span> </span>&#123;</span><br><span class="line">    List&lt;MethodManager&gt; methodList = networkList.get(register);</span><br><span class="line">    <span class="keyword">if</span>( methodList == <span class="keyword">null</span> ) &#123;</span><br><span class="line">        methodList = findAnnotationMethod(register);</span><br><span class="line">        networkList.put(register, methodList);</span><br><span class="line">        Log.e(Constants.LOG_TAG, register.getClass().getName() + <span class="string">" Registered"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>networkList</code> is a map which key is the actiivty and value is a list of methods that has the annotation. <code>findAnnotationMethod</code> is the function to get all satisfied function that has the <em>network</em> annotation.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> List&lt;MethodManager&gt; <span class="title">findAnnotationMethod</span><span class="params">( Object register )</span> </span>&#123;</span><br><span class="line">    List&lt;MethodManager&gt; methodList = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">    Class&lt;?&gt; clazz = register.getClass();</span><br><span class="line">    Method[] methods = clazz.getMethods();</span><br><span class="line">    <span class="keyword">for</span>( Method method : methods ) &#123;</span><br><span class="line">        Network network = method.getAnnotation(Network.class);</span><br><span class="line">        <span class="keyword">if</span>( network == <span class="keyword">null</span> ) &#123;</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        Type returnType = method.getGenericReturnType();</span><br><span class="line">        <span class="keyword">if</span>( !<span class="string">"void"</span>.equals( returnType.toString() ) ) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException( method.getName() + <span class="string">" return type should be void"</span> );</span><br><span class="line">        &#125;</span><br><span class="line">        Class&lt;?&gt;[] parameterTypes = method.getParameterTypes();</span><br><span class="line">        <span class="keyword">if</span>( parameterTypes.length != <span class="number">1</span> ) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException( method.getName() + <span class="string">" should have only one parameter"</span> );</span><br><span class="line">        &#125;</span><br><span class="line">        MethodManager methodManager = <span class="keyword">new</span> MethodManager( parameterTypes[<span class="number">0</span>], network.netType(), method );</span><br><span class="line">        methodList.add(methodManager);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> methodList;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>This is the most improtant part in our application of annotation. We use Java refection to do this.</p>
+<ol>
+<li>Get all function in that activity/class and filter the function has the <em>network</em> annotation.</li>
+<li>Filter the voide return type function</li>
+<li>Filter the one parameter function</li>
+<li>Store the function in the list. ParameterType(netType in the parameter, current network connection type), network.netType(netType in our annotation, what kind of network changes we want to catch), method</li>
+</ol>
+<p>Now after we registered all the satisfied methods in our application, how to trigger it? In receiver, when the network changes, the receiver should receive the broadcasting message. Then trigger a <em>post</em> function with the current network connection type<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">post</span><span class="params">(NetType netType)</span> </span>&#123;</span><br><span class="line">    Set&lt;Object&gt; set = networkList.keySet();</span><br><span class="line">    <span class="keyword">for</span> ( <span class="keyword">final</span> Object getter : set ) &#123;</span><br><span class="line">        List&lt;MethodManager&gt; methodeList = networkList.get(getter);</span><br><span class="line">        <span class="keyword">if</span>( methodeList != <span class="keyword">null</span> ) &#123;</span><br><span class="line">            <span class="keyword">for</span>( <span class="keyword">final</span> MethodManager method : methodeList ) &#123;</span><br><span class="line">                <span class="keyword">if</span>( method.getType().isAssignableFrom(netType.getClass() ) ) &#123;</span><br><span class="line">                    <span class="keyword">switch</span> ( method.getNetType() ) &#123;</span><br><span class="line">                        <span class="keyword">case</span> AUTO:</span><br><span class="line">                            invoke( method, getter, netType );</span><br><span class="line">                            <span class="keyword">break</span>;</span><br><span class="line">                        <span class="keyword">case</span> WIFI:</span><br><span class="line">                            <span class="keyword">if</span>( netType == NetType.WIFI || netType == NetType.NONE ) &#123;</span><br><span class="line">                                invoke( method, getter, netType );</span><br><span class="line">                            &#125;</span><br><span class="line">                            <span class="keyword">break</span>;</span><br><span class="line">                        <span class="keyword">case</span> MOBILE:</span><br><span class="line">                            <span class="keyword">if</span>( netType == NetType.MOBILE || netType == NetType.NONE ) &#123;</span><br><span class="line">                                invoke( method, getter, netType );</span><br><span class="line">                            &#125;</span><br><span class="line">                            <span class="keyword">break</span>;</span><br><span class="line">                        <span class="keyword">default</span>:</span><br><span class="line">                            <span class="keyword">break</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>We give the <em>network</em> attribute <em>netType</em> as NetType.AUTO. so <code>method.getNetType()</code> will give what kind of network changes we want to catch. In our case, it is AUTO, so it will invoke the function with the annotation as long as the network changes. If it WIFI, it will only invoke the function when WIFI changes. This is how we use annotation. If you are interested in the source code, you can check my <a href="https://github.com/bbbbyang/NetworkListener/tree/Annotation-Network-Listener" target="_blank" rel="noopener">NetworkListener</a> repo with Annnotation-Network-Listener branch.</p>
+
+  </div>
+  <div class="post-footer">
+    
+      <ul class="post-tag-list"><li class="post-tag-list-item"><a class="post-tag-list-link" href="/tags/Annotation/">Annotation</a></li></ul>
+    
+
+    <a href="#top" class="top">Back to Top</a>
+  </div>
+</article>
+<footer>
+  &copy; 2020
+  <span class="author">
+    Bingyang Liu
+  </span>
+</footer>
+    </div>
+  </body>
+</html>

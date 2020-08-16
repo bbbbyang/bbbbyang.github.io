@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+  <!DOCTYPE html>
+<html lang="en">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  
+  <title>C++ Polymorphism - Bingyang</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  
+  <meta name="keywords" content="Polymorphism">
+  
+  
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=1.02">
+  
+  
+    <link rel="alternate" href="/atom.xml " title="Bingyang" type="application/atom+xml">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+</head></html>
+  <body>
+    <div class="container">
+      <header class="header">
+  <div class="blog-title">
+    <a href="/" class="logo">Bingyang</a>
+    <div class="subtitle">总有人把你推向阳光</div>
+  </div>
+  <nav class="navbar">
+    <ul class="menu">
+      
+        <li class="menu-item">
+          <a href="/" class="menu-item-link">Home</a>
+        </li>
+      
+        <li class="menu-item">
+          <a href="/archives" class="menu-item-link">Archives</a>
+        </li>
+      
+        <li class="menu-item">
+          <a href="/about" class="menu-item-link">About</a>
+        </li>
+      
+    </ul>
+  </nav>
+</header>
+<article class="post">
+  <div class="post-title">
+    <h1 class="article-title">C++ Polymorphism</h1>
+  </div>
+   <div class="post-meta">
+    <span class="post-time">2020-05-17</span>
+  </div>
+  <div class="post-content">
+    <p>When I first time using C++ in my work, I was wondering why is the parent class desctructor need to be virtual. It is something related to polymorphism. About polymorphism, we know there are three principles:</p>
+<ol>
+<li>inheritance</li>
+<li>override</li>
+<li>upcast, father pointer/reference pointing to a child object</li>
+</ol>
+<p>You certainly can find lots of examples in Java, expecially used by the Java interface. Here I want to talk about the polymorphism in C++.</p>
+<h4 id="Static-and-Dynamic-Polymorphism"><a href="#Static-and-Dynamic-Polymorphism" class="headerlink" title="Static and Dynamic Polymorphism"></a>Static and Dynamic Polymorphism</h4><p>The essential concept of polymorphism is one interface but multiple forms. There are two types polymorphism, static polymorphism and dynamic polymorphism. The difference is when to bind the function address.</p>
+<blockquote>
+<p>In the compile time, we can confirm the function called by which object. For example, overload and generic are static polymorphism. </p>
+<p>When we using a virtual function, it can only bind the function address in the run time, which is a dynamic polymorphism. In this blog, I will discuss more on dynamic binding and virtual function in cpp.</p>
+</blockquote>
+<h4 id="C-object-model"><a href="#C-object-model" class="headerlink" title="C++ object model"></a>C++ object model</h4><p>For C, data and function are separate. It does not support the relation between these two. C++ use abstact data type ADT to bind data and function. C++ has two types of data member, static and non-static and it has three types of function member, static, nonstatic and virtual.</p>
+<p>we can see a C++ object model here. Non-static variable members will be put in a data member table. For virtual function, C++ object model has a vptr in data member table which will point to a virtual table. The first slot of the virtual table is virtual type object. </p>
+<p>pic here</p>
+<h4 id="Polymorphism"><a href="#Polymorphism" class="headerlink" title="Polymorphism"></a>Polymorphism</h4><p>Here is how C++ support polymorphism.</p>
+<ol>
+<li>Base class pointer/reference pointing to a derived class</li>
+<li>Function need to be virtual.</li>
+</ol>
+<p>Here is a simple example (we don’t consider destructor here).<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Animal</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    <span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">string</span> name;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">sleep</span><span class="params">()</span></span>&#123;<span class="built_in">cout</span>&lt;&lt;<span class="string">"animal sleep"</span>&lt;&lt;<span class="built_in">endl</span>;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">breathe</span><span class="params">()</span></span>&#123;<span class="built_in">cout</span>&lt;&lt;<span class="string">"animal breathe"</span>&lt;&lt;<span class="built_in">endl</span>;&#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Fish</span>:</span><span class="keyword">public</span> animal</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">breathe</span><span class="params">()</span></span>&#123;<span class="built_in">cout</span>&lt;&lt;<span class="string">"fish bubble"</span>&lt;&lt;<span class="built_in">endl</span>;&#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    Fish fh;</span><br><span class="line">    Animal *pAn = &amp;fh;</span><br><span class="line">    Fish *pFh = &amp;fh;</span><br><span class="line">    animal ani = fh;</span><br><span class="line">    ani.breathe();</span><br><span class="line">    pAn-&gt;breathe();</span><br><span class="line">    pFh-&gt;breathe();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="number">1000</span>:|---------------------|                      --|</span><br><span class="line">     |        Animal       |  ---&gt;  Animal memory   |</span><br><span class="line"><span class="number">100</span>x |---------------------|                        | --&gt;Fish memory</span><br><span class="line">     | Fish addtional part |                        |</span><br><span class="line">     |---------------------|                      --|</span><br></pre></td></tr></table></figure></p>
+<p>The result is<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">animal breathe</span><br><span class="line">animal breathe</span><br><span class="line">fish bubble</span><br></pre></td></tr></table></figure></p>
+<p>So for the first <em>ani</em> variable, it will cause an object slicing. It is easy to explain. <code>animal ani = fh;</code> It will call <em>animal</em> copy constructor and assign fish object to an animal object. Animal object won’t has any fish addtional infomation, that is object slicing.</p>
+<p>We have two pointers, <em>pAn</em> and <em>pfh</em> pointing to the same address, the first byte of the <em>Fish</em> object. However, there is an important difference between these two pointers. <em>pAn</em> only contains the <em>Animal</em> memory and <em>pFh</em> has the whole fish object memory. This is why we have <em>animal</em> porinter pointing to <em>fish</em> but it still do not have polymorphism.</p>
+<p>Let’s make the <em>breathe</em> as virtual function. <em>main</em> function will be same.<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Animal</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    <span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">string</span> name;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">sleep</span><span class="params">()</span></span>&#123;<span class="built_in">cout</span>&lt;&lt;<span class="string">"animal sleep"</span>&lt;&lt;<span class="built_in">endl</span>;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="keyword">virtual</span> <span class="title">breathe</span><span class="params">()</span></span>&#123;<span class="built_in">cout</span>&lt;&lt;<span class="string">"animal breathe"</span>&lt;&lt;<span class="built_in">endl</span>;&#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Fish</span>:</span><span class="keyword">public</span> Animal</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">breathe</span><span class="params">()</span> override </span>&#123;<span class="built_in">cout</span>&lt;&lt;<span class="string">"fish bubble"</span>&lt;&lt;<span class="built_in">endl</span>;&#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>Based on what we talked about C++ object model, we will have a virtual table pointer pointing a virtual table<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">Animal</span><br><span class="line">|---------------------|</span><br><span class="line">|        Animal       |</span><br><span class="line">|---------------------|            |-------|</span><br><span class="line">|    __vptr_Animal    |  -------&gt;  | slot1 |  ----&gt; type_info for Animal</span><br><span class="line">|---------------------|            |-------|</span><br><span class="line">                                   | slot2 |  ----&gt; Animal::breathe()</span><br><span class="line">                                   |-------|</span><br><span class="line">Fiah</span><br><span class="line">          |-- |---------------------|</span><br><span class="line">          |   |        Animal       |</span><br><span class="line">Animal    |   |---------------------|       |-------|</span><br><span class="line">subobject |   |    __vptr_Animal    |  --&gt;  | slot1 |  --&gt; type_info for Fish</span><br><span class="line">          |-- |---------------------|       |-------|</span><br><span class="line">              | Fish addtional part |       | slot2 |  --&gt; Fish::breathe()</span><br><span class="line">              |---------------------|       |-------|</span><br></pre></td></tr></table></figure></p>
+<p>Virtual functions address have been obtained during complie time. Virtual function table size and contains can not be modified during run time. In order to find the table, very class object has a <em>vptr</em> pointer pointing to the virtual table. And in the virtual table, the virtual function will be indexed in the table slots. All this will be done in the compile time, while in the runtime it will activate the virtual function.</p>
+<p>Activatation the virtual function has three possibility:</p>
+<ol>
+<li>override the base virtual function, it will replace the base class virtual function</li>
+<li>Inherent the base virtual function</li>
+<li>Add new virtual function, enlager the virtual table.</li>
+</ol>
+<p>(pure vitual function index put <em>pure_virtual_call() with the corresponding slot).<br>So when we change _breathe</em> as virtual function in <em>Animal</em> and override <em>breathe</em> in <em>Fish</em>, it will replace the slot2 with <code>Fish::breathe()</code> during the activation in the runtime.</p>
+<h4 id="Virtual-destructor"><a href="#Virtual-destructor" class="headerlink" title="Virtual destructor"></a>Virtual destructor</h4><p>Now, I think we can explain why the base class destructor need to be virtual.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">int main()</span><br><span class="line">&#123;</span><br><span class="line">    Animal *pAn = new Fish;</span><br><span class="line">    delete pAn;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>When we do the <code>delete pAn</code> it will call the <em>Animal</em> destructor to destruct an object of <em>Animal</em> but it actually created a <em>Fish</em> object. it will cause memory problem.</p>
+
+  </div>
+  <div class="post-footer">
+    
+      <ul class="post-tag-list"><li class="post-tag-list-item"><a class="post-tag-list-link" href="/tags/Polymorphism/">Polymorphism</a></li></ul>
+    
+
+    <a href="#top" class="top">Back to Top</a>
+  </div>
+</article>
+<footer>
+  &copy; 2020
+  <span class="author">
+    Bingyang Liu
+  </span>
+</footer>
+    </div>
+  </body>
+</html>

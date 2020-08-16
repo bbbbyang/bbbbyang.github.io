@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+  <!DOCTYPE html>
+<html lang="en">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  
+  <title>Java Dynamic Proxy and AOP - Bingyang</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  
+  <meta name="keywords" content="AOP">
+  
+  
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=1.02">
+  
+  
+    <link rel="alternate" href="/atom.xml " title="Bingyang" type="application/atom+xml">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+</head></html>
+  <body>
+    <div class="container">
+      <header class="header">
+  <div class="blog-title">
+    <a href="/" class="logo">Bingyang</a>
+    <div class="subtitle">总有人把你推向阳光</div>
+  </div>
+  <nav class="navbar">
+    <ul class="menu">
+      
+        <li class="menu-item">
+          <a href="/" class="menu-item-link">Home</a>
+        </li>
+      
+        <li class="menu-item">
+          <a href="/archives" class="menu-item-link">Archives</a>
+        </li>
+      
+        <li class="menu-item">
+          <a href="/about" class="menu-item-link">About</a>
+        </li>
+      
+    </ul>
+  </nav>
+</header>
+<article class="post">
+  <div class="post-title">
+    <h1 class="article-title">Java Dynamic Proxy and AOP</h1>
+  </div>
+   <div class="post-meta">
+    <span class="post-time">2019-07-10</span>
+  </div>
+  <div class="post-content">
+    <p>AOP and IOC are the two important concepts in Spring developement. AOP is Aspect Oriented Programming. I will start with proxy design pattern.</p>
+<p>When we play online game, we can pay for someone else to help us to play to get experience or money. This <em>someone else</em> is a proxy-like role. Or more likely, vendors do not want to sell clothes or shoes directly with customers, they will ask a proxy, more like a store, to communicate with customers. Do something like, deal with invoice or a return. Proxy is like a middle man stuff. There are two good points for proxy pattern.</p>
+<ul>
+<li>Proxy can hide the original object. For a store, customer will not contact vendor.</li>
+<li>Proxy can decouple the original object with the clients, so proxy can do more stuff, like heal with the invoice or a return in the example.</li>
+</ul>
+<h4 id="Static-Proxy"><a href="#Static-Proxy" class="headerlink" title="Static Proxy"></a>Static Proxy</h4><p>If the proxy class exists already before run time. It is called static proxy. We define an interface called <code>Product</code>, it has two functions <em>sell</em> and <em>service</em>.<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> interface <span class="title">Product</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">service</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">sell</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>For a vendor, which is considered as a real subject, implements this product interface.<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Vendor</span> <span class="keyword">implements</span> <span class="title">Product</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">service</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"product service"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">sell</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"product sell"</span>) ;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>Customers are so annoying and the vendor does not want to deal with the sell/service process with customers. He wants to ask a proxy for help. This proxy agent can decouple real subject and client.<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> ProxyAgent implements Product &#123;</span><br><span class="line">    Product product = <span class="keyword">new</span> Vendor(); <span class="comment">// We usually use setter DI to inject</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">service</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"Proxy service"</span>);</span><br><span class="line">        product.service();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">sell</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"Proxy sell"</span>) ;</span><br><span class="line">        product.sell();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>Client calls the <code>ProxyAgent</code> to ask for a service or sell.<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Client</span> </span>&#123;</span><br><span class="line">    Product product = <span class="keyword">new</span> ProxyAgent();</span><br><span class="line">    product.service();</span><br><span class="line">    product.sell();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>So now, if the process of service or sell need to be changed, you can just fix the functions inside ProxyAgent. Like this product is only for student, you can simply do this<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> ProxyAgent implements Product &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">sell</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"Proxy sell"</span>) ;</span><br><span class="line">        <span class="keyword">if</span>( isStudent ) &#123;</span><br><span class="line">            vendor.sell();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>Now you can see why we want this proxy. Proxy class can decouple the real subject with the client. But we need to define the proxy class before running the code. However, if we want to use this pattern, we need to define a proxy class for every class.</p>
+<h4 id="Dynamic-Proxy"><a href="#Dynamic-Proxy" class="headerlink" title="Dynamic Proxy"></a>Dynamic Proxy</h4><p>There are so many classes in our code and we definitely do not want to create proxy class for every single class. How can we do not create a proxy class but get the feature of it?</p>
+<p>When we create an instance, the process should be like<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Vendor.java  --&gt;  Vendor.class  --&gt;  Class&lt;Vendor&gt;  --&gt; vendor object</span><br></pre></td></tr></table></figure></p>
+<p>So the most important part is to get <code>Class Object</code> and use it to create an instance. We use java refection to get this class object during run time. Interface is the common info shared by proxy and real subject. However, interface can not create an instance. JDK offers us with java.lang.reflect.InvocationHandler interface and java.lang.reflect.Proxy class.</p>
+<p>Proxy.getProxyClass or Proxy.getNewInstance can dynamic create an proxy class instance for the real subject. We can write it this way</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DynamicProxy</span> <span class="keyword">implements</span> <span class="title">InvocationHandler</span> </span>&#123; </span><br><span class="line">    <span class="keyword">private</span> Object obj; </span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">getNewInstance</span><span class="params">(Object obj)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.obj = obj;</span><br><span class="line">        <span class="keyword">return</span> Proxy.newProxyInstance(object.getClass().getClassLoader(), object.getClass().getInterfaces(), <span class="keyword">this</span>);</span><br><span class="line">    &#125; </span><br><span class="line"> </span><br><span class="line">    <span class="meta">@Override</span> </span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">invoke</span><span class="params">(Object proxy, Method method, Object[] args)</span> <span class="keyword">throws</span> Throwable </span>&#123; </span><br><span class="line">        System.out.println(<span class="string">"before"</span>); </span><br><span class="line">        Object result = method.invoke(obj, args); </span><br><span class="line">        System.out.println(<span class="string">"after"</span>); </span><br><span class="line">        <span class="keyword">return</span> result; </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>We pass the real subject into this dynamic proxy, it will get the classloader and interface info. In the invoke function, we can enhance the code in the way we want.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DynamicProxyDemo</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span>&#123;</span><br><span class="line">        DynamicProxy proxySubject = <span class="keyword">new</span> DynamicProxy();</span><br><span class="line">        Product product = (Product)proxySubject.getNewInstance( <span class="keyword">new</span> Vendor() );</span><br><span class="line">        product.sell();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Here, the <em>product</em> is an instance of <code>Proxy</code> class which implements <code>product</code> interface.</p>
+<ul>
+<li><code>Product</code> is an interface which does not have constructor and can not generate instance.</li>
+<li>Helped by <code>Proxy</code> class, it can disassemble the info of <code>Product</code> class and generate an proxy object instance</li>
+<li>Handler.invoke proxy the real subject function.</li>
+</ul>
+<p>Proxy class object will generate a proxy object which implements interface. The essential of proxy object is that it implements the interface which is the same implemented in real subject.</p>
+
+  </div>
+  <div class="post-footer">
+    
+      <ul class="post-tag-list"><li class="post-tag-list-item"><a class="post-tag-list-link" href="/tags/AOP/">AOP</a></li></ul>
+    
+
+    <a href="#top" class="top">Back to Top</a>
+  </div>
+</article>
+<footer>
+  &copy; 2020
+  <span class="author">
+    Bingyang Liu
+  </span>
+</footer>
+    </div>
+  </body>
+</html>

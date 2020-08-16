@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+  <!DOCTYPE html>
+<html lang="en">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  
+  <title>HashTable And SPH - Bingyang</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  
+  <meta name="keywords" content="HashTable">
+  
+  
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=1.02">
+  
+  
+    <link rel="alternate" href="/atom.xml " title="Bingyang" type="application/atom+xml">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+</head></html>
+  <body>
+    <div class="container">
+      <header class="header">
+  <div class="blog-title">
+    <a href="/" class="logo">Bingyang</a>
+    <div class="subtitle">总有人把你推向阳光</div>
+  </div>
+  <nav class="navbar">
+    <ul class="menu">
+      
+        <li class="menu-item">
+          <a href="/" class="menu-item-link">Home</a>
+        </li>
+      
+        <li class="menu-item">
+          <a href="/archives" class="menu-item-link">Archives</a>
+        </li>
+      
+        <li class="menu-item">
+          <a href="/about" class="menu-item-link">About</a>
+        </li>
+      
+    </ul>
+  </nav>
+</header>
+<article class="post">
+  <div class="post-title">
+    <h1 class="article-title">HashTable And SPH</h1>
+  </div>
+   <div class="post-meta">
+    <span class="post-time">2019-04-05</span>
+  </div>
+  <div class="post-content">
+    <h4 id="Data-Structure-of-Hash-Table"><a href="#Data-Structure-of-Hash-Table" class="headerlink" title="Data Structure of Hash Table"></a>Data Structure of Hash Table</h4><p>HashTable is used for storing key-value pairs. In Java, when not considering synchronized(thread safety) , we usually use HashMap like<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">HashMap&lt;Integer,String&gt; hm=<span class="keyword">new</span> HashMap&lt;Integer,String&gt;();</span><br><span class="line">hm.put(<span class="number">100</span>,<span class="string">"LIU"</span>);</span><br></pre></td></tr></table></figure></p>
+<p>The ideal hash table is a fixed array containing some value. Use the key to find the corresponding data. We can check the following diagram.<br><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Hash_table_3_1_1_0_1_0_0_SP.svg/315px-Hash_table_3_1_1_0_1_0_0_SP.svg.png" alt></p>
+<p>We want all keys mapping into different units. However, this is impossible because that the size of the array is fixed while we can have key-value as many as possible. So after some kind of hashing function, we will get collisions which are two or more keys result in same value. One way to resolve this collision called separate chaining. This is how HashMap/Table implemented in Java.</p>
+<p>We have two data structure combined, one is array another one is linked list. Every element in the array is a linked list. When it comes to a collision, the new element will get inserted into the linked list. The data structure is like the following picture</p>
+<p><img src="http://wiki.jikexueyuan.com/project/java-collection/images/hashtable1.png" alt></p>
+<h4 id="HashTable-in-SPH"><a href="#HashTable-in-SPH" class="headerlink" title="HashTable in SPH"></a>HashTable in SPH</h4><p>We can see that HashTable data structure is easy to understand. In Java we can directly use HashMap when not considering thread safety. But how could we use this data structure thoughts to solve problems? Here is an application in classic computer graphics fluid simulation algorithm, SPH, Smoothed particle Hydrodynamics.</p>
+<p>Here I will skip all the mathematics principle introduction in SPH. The basic idea of SPH is that there are thousand hundreds of particles in space and every particle will have mainly three forces based on the distance from others (which means one particle will only get affected by the ones within a distance based on itself). Follow this principle, the particles will be moving like fluid.</p>
+<p><img src="http://rnd-zimmer.de/images/sph_particles2.png" alt></p>
+<p>Here is the 3-D version of SPH simulation. There are so many particles within this space. For every single particle, we need to calculate forces from other particles. Lucky, we only need to find all the neighbour particles, the ones within a distance(h) to it.</p>
+<p><img src="https://github.com/bbbbyang/PictureRepository/blob/master/SPH/Particles.jpg?raw=true" alt></p>
+<p>HashTable is a good way used to find the neighbour particles. First we need to put our space into a grid structure. This grid structure is an array, we can simply use a 1-D array to represent 2-D space. The cell size will be the distance that neighbour particles will get affected (I will explain it later).</p>
+<p><img src="https://github.com/bbbbyang/PictureRepository/blob/master/SPH/Gird.jpg?raw=true" alt></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Cell_Size = distance;</span><br><span class="line">Grid_Size = Space_Size / Cell_Size;</span><br><span class="line">Grid_Size.x = (<span class="keyword">int</span>)Grid_Size.x;</span><br><span class="line">Grid_Size.y = (<span class="keyword">int</span>)Grid_Size.y;</span><br><span class="line">Number_Cells = (<span class="keyword">int</span>)Grid_Size.x * (<span class="keyword">int</span>)Grid_Size.y;</span><br><span class="line">Cells = (Cell *)<span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(Cell) * Number_Cells);</span><br></pre></td></tr></table></figure>
+<p>So Every particle will be falling into one cell. Here is the problem. There must be cases that many particles fall into one cell. Now, we need to use that separate chaining, linked list structure. Particles that are in one cell, will be stored into a linked list. Here is how we use HashTable structure to store all particles.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">void SPH::Hash_Grid()&#123;</span><br><span class="line">	for(int i = 0; i &lt; Number_Cells; i++)</span><br><span class="line">		Cells[i].head = NULL;</span><br><span class="line">	int hash;</span><br><span class="line">	Particle *p;</span><br><span class="line">	for(int i = 0; i &lt; Number_Particles; i ++)&#123;</span><br><span class="line">		p = &amp;Particles[i];</span><br><span class="line">		//Calculate_Cell_Position is to find the coordinates in the space</span><br><span class="line">		//Calculate_Cell_Hash is to find the index in that 1-D array grid</span><br><span class="line">		hash = Calculate_Cell_Hash(Calculate_Cell_Position(p-&gt;pos));</span><br><span class="line">		if(Cells[hash].head == NULL)&#123;</span><br><span class="line">			p-&gt;next = NULL;</span><br><span class="line">			Cells[hash].head = p;</span><br><span class="line">		&#125;</span><br><span class="line">		else&#123;</span><br><span class="line">			p-&gt;next = Cells[hash].head;</span><br><span class="line">			Cells[hash].head = p;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>When we need to find its neighbour particles, first we need to find the one is in which cell. Then, we can only pick the cells around this cell (particles in 8 cells instead of calculating all particles, I did not show all cells) that is why we use distance as the cell size.</p>
+<p><img src="https://github.com/bbbbyang/PictureRepository/blob/master/SPH/neighbour.jpg?raw=true" alt></p>
+<p>For every particle, the x and y position will be used as key and itself will be used as value. We have an array representing grid space and particles in one cell will be stored in a linked list. If you are interested in SPH source code, please check <a href="https://github.com/bbbbyang/Smoothed-Particle-Hydrodynamics" target="_blank" rel="noopener">here</a>.</p>
+
+  </div>
+  <div class="post-footer">
+    
+      <ul class="post-tag-list"><li class="post-tag-list-item"><a class="post-tag-list-link" href="/tags/HashTable/">HashTable</a></li></ul>
+    
+
+    <a href="#top" class="top">Back to Top</a>
+  </div>
+</article>
+<footer>
+  &copy; 2020
+  <span class="author">
+    Bingyang Liu
+  </span>
+</footer>
+    </div>
+  </body>
+</html>
