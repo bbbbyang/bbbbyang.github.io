@@ -1,0 +1,16 @@
+#footer
+  if theme.busuanzi == true
+    div
+      //span#busuanzi_container_site_pv
+        //span= ' '
+        //span#busuanzi_value_site_pv
+        //span(rel='nofollow')= ' ' + __(' HITS, ')
+      span#busuanzi_container_site_uv
+        span#busuanzi_value_site_uv
+        span(rel='nofollow')= ' ' + __(' VISITORS.')
+  = config.title.toUpperCase() + ' © ' + date(Date.now(), 'YYYY')
+  |  刘冰洋 | HEADING TO THE FUTURE
+  br
+  a(rel='nofollow', class="fa fa-github fa-2x" target='_blank', href='https://github.com/bbbbyang')
+  |  &nbsp; 
+  a(rel='nofollow', class="fa fa-linkedin fa-2x" target='_blank', href='https://www.linkedin.com/in/bingyang-liu-451b7976/')
