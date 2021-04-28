@@ -1,59 +1,4 @@
-<!DOCTYPE html>
-<html>
-  <!DOCTYPE html>
-<html lang="en">
-<head><meta name="generator" content="Hexo 3.9.0">
-  <meta http-equiv="content-type" content="text/html; charset=utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
-  
-  <title>Dependence Inversion Principle (DIP, DI, IoC) - Bingyang</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-  
-  <meta name="keywords" content="DIP">
-  
-  
-    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=1.02">
-  
-  
-    <link rel="alternate" href="/atom.xml " title="Bingyang" type="application/atom+xml">
-  
-
-  <link rel="stylesheet" href="/css/style.css">
-</head></html>
-  <body>
-    <div class="container">
-      <header class="header">
-  <div class="blog-title">
-    <a href="/" class="logo">Bingyang</a>
-    <div class="subtitle">总有人把你推向阳光</div>
-  </div>
-  <nav class="navbar">
-    <ul class="menu">
-      
-        <li class="menu-item">
-          <a href="/" class="menu-item-link">Home</a>
-        </li>
-      
-        <li class="menu-item">
-          <a href="/archives" class="menu-item-link">Archives</a>
-        </li>
-      
-        <li class="menu-item">
-          <a href="/about" class="menu-item-link">About</a>
-        </li>
-      
-    </ul>
-  </nav>
-</header>
-<article class="post">
-  <div class="post-title">
-    <h1 class="article-title">Dependence Inversion Principle (DIP, DI, IoC)</h1>
-  </div>
-   <div class="post-meta">
-    <span class="post-time">2019-01-20</span>
-  </div>
-  <div class="post-content">
-    <p>For the software design, there are five principles called S.O.L.I.D, which stands for</p>
+<!DOCTYPE html><html lang="en"><head><meta name="generator" content="Hexo 3.9.0"><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>Dependence Inversion Principle (DIP, DI, IoC) | Bingyang</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/7.0.0/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/pure-min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/grids-responsive-min.css"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script><link rel="Shortcut Icon" type="image/x-icon" href="/favicon-32.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><link rel="alternate" type="application/atom+xml" href="/atom.xml"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">Dependence Inversion Principle (DIP, DI, IoC)</h1><a id="logo" href="/.">Bingyang</a><p class="description">总有人把你推向阳光</p></div><div id="nav-menu"><a class="current" href="/."><i class="fa fa-home"> Home</i></a><a href="/archives/"><i class="fa fa-archive"> Archive</i></a><a href="/about/"><i class="fa fa-user"> About</i></a></div></div><div class="pure-g" id="layout"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">Dependence Inversion Principle (DIP, DI, IoC)</h1><div class="post-meta">Jan 20, 2019<span> | </span><span class="category"><a href="/categories/Design-Pattern/">Design Pattern</a></span></div><div class="post-content"><p>For the software design, there are five principles called S.O.L.I.D, which stands for</p>
 <ol>
 <li>Single Responsibility Principle</li>
 <li>Open-closed Principle</li>
@@ -90,22 +35,6 @@
 <h3 id="Dependence-Injection-DI"><a href="#Dependence-Injection-DI" class="headerlink" title="Dependence Injection (DI)"></a>Dependence Injection (DI)</h3><p>IoC is our purpose and dependence injection is how we do it. In the code above we used contractor injection. If we use a setter, it is called setter injection.<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Tool tool;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="title">Person</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">eat</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        tool.use();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setter</span><span class="params">(Tool tool)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.tool = tool;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p>Also we can also use interface injection. It is very similar with setter. With interface injection, we can only inject the tool to the person want to eat.</p>
 <p>Inversion of Control is the design pattern followed the Denpendency Inversion Principle and the Dependency Injection is the way to do it.</p>
-
-  </div>
-  <div class="post-footer">
-    
-      <ul class="post-tag-list"><li class="post-tag-list-item"><a class="post-tag-list-link" href="/tags/DIP/">DIP</a></li></ul>
-    
-
-    <a href="#top" class="top">Back to Top</a>
-  </div>
-</article>
-<footer>
-  &copy; 2020
-  <span class="author">
-    Bingyang Liu
-  </span>
-</footer>
-    </div>
-  </body>
-</html>
+</div><div class="tags"><a href="/tags/DIP/">DIP</a></div><div class="post-nav"><a class="pre" href="/2019/04/05/HashTable-Map-And-SPH/">HashTable And SPH</a><a class="next" href="/2018/11/15/OAuth-2-0/">OAuth 2.0</a></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> Categories</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Algorithm/">Algorithm</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Android/">Android</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/C/">C++</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Design-Pattern/">Design Pattern</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Java/">Java</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Linux/">Linux</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Protocol/">Protocol</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> Tags</i></div><div class="tagcloud"><a href="/tags/DIP/" style="font-size: 15px;">DIP</a> <a href="/tags/Polymorphism/" style="font-size: 15px;">Polymorphism</a> <a href="/tags/AOP/" style="font-size: 15px;">AOP</a> <a href="/tags/HashTable/" style="font-size: 15px;">HashTable</a> <a href="/tags/NIO/" style="font-size: 15px;">NIO</a> <a href="/tags/Interface/" style="font-size: 15px;">Interface</a> <a href="/tags/Mean-Shift/" style="font-size: 15px;">Mean Shift</a> <a href="/tags/View/" style="font-size: 15px;">View</a> <a href="/tags/Annotation/" style="font-size: 15px;">Annotation</a> <a href="/tags/OAuth/" style="font-size: 15px;">OAuth</a> <a href="/tags/Deep-copy/" style="font-size: 15px;">Deep copy</a> <a href="/tags/TLS/" style="font-size: 15px;">TLS</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> Links</i></div><ul></ul><a target="_blank"></a></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer"><div><!--span#busuanzi_container_site_pv//span= ' '
+//span#busuanzi_value_site_pv
+//span(rel='nofollow')= ' ' + __(' HITS, ')--><span id="busuanzi_container_site_uv"><span id="busuanzi_value_site_uv"></span><span rel="nofollow">  VISITORS.</span></span></div>BINGYANG © 2021 刘冰洋 | HEADING TO THE FUTURE<br><a class="fa fa-github fa-2x" rel="nofollow" target="_blank" href="https://github.com/bbbbyang"></a> &nbsp; <a class="fa fa-linkedin fa-2x" rel="nofollow" target="_blank" href="https://www.linkedin.com/in/bingyang-liu-451b7976/"></a></div></div></div><a class="show" id="rocket" href="#top"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//cdn.bootcss.com/fancybox/3.2.5/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/3.2.5/jquery.fancybox.min.css"><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script><script src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script></div></body></html>
