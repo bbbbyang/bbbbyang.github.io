@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2021-04-28T05:23:14.218Z</updated>
+  <updated>2021-11-09T03:33:23.887Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -15,6 +15,31 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Dynamic Programming</title>
+    <link href="http://yoursite.com/2021/11/08/Dynamic-Programming/"/>
+    <id>http://yoursite.com/2021/11/08/Dynamic-Programming/</id>
+    <published>2021-11-09T01:38:03.000Z</published>
+    <updated>2021-11-09T03:33:23.887Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="Backtracing"><a href="#Backtracing" class="headerlink" title="Backtracing"></a>Backtracing</h3><p>Fibonacci sequence, this is a classic math calculation.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">F(1)=1</span><br><span class="line">F(2)=1</span><br><span class="line">F(n)=F(n-1) + F(n-2)</span><br></pre></td></tr></table></figure></p><p>If we need to calcute F(20), we need F(19) and F(18). For F(19) we need to know F(18) and F(17) util it reaches F(1) and F(2). we can have the following Tree structure.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">                     F(20)</span><br><span class="line">        |--------------|---------------|</span><br><span class="line">      F(19)                          F(18)</span><br><span class="line">  |-----|-----|                  |-----|-----|</span><br><span class="line">F(18)       F(17)              F(17)       F(16)</span><br></pre></td></tr></table></figure></p><p>And the leaf of every branch is F(1) and F(2). This looks like we can use recursive method to solve the problem. The recursive method has two condition:</p><ol><li>Baseline, the end of recursive which is F(1)=1, F(2)=1</li><li>Recursive condition, F(n)=F(n-1)+F(n-2)<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">int fib(int N) &#123;</span><br><span class="line">    if (N == 1 || N == 2) return 1;</span><br><span class="line">    return fib(N - 1) + fib(N - 2);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li></ol><p>The bracktracing approach will go to the leaf of every branch, it is a Brute-force algorithm. For Tree structure, it is also called DFS. From the Tree graphic, we noticed that F(18) appeared twice. and F(17) will appear three times, which means we have a lots of duplicated calculation. Brachtracing is calculating from top to bottom.</p><h3 id="Dynamic-Programming"><a href="#Dynamic-Programming" class="headerlink" title="Dynamic Programming"></a>Dynamic Programming</h3><p>Since we know the leaf of every branch is F(1) or (F2), we consider to calculate every node of this tree from bottom to top, this will be much simplier. This is the whole thought of Dynamic Programming. DP problem we need to have a state transition function<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">F(n) = |  1  n=1,2</span><br><span class="line">       |  F(n-1)+F(n-2), n&gt;2</span><br></pre></td></tr></table></figure></p><p>It is look exactly same with the bracktracing conditions. Here is the code<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">int fib(int n) &#123;</span><br><span class="line">    vector&lt;int&gt; dp(n, 0);</span><br><span class="line">    dp[0] = 1;</span><br><span class="line">    for(int i = 1; i &lt; n; i++ ) &#123;</span><br><span class="line">        if( i == 1) dp[1]=2;</span><br><span class="line">        else dp[i] = dp[i-1] + dp[i-2];</span><br><span class="line">    &#125;</span><br><span class="line">    return dp[n-1];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p><p>Iterate from bottom to top, calculator every node to avoid duplicated calculation. We also can consider dp problem as how to get N from function F previous state. Leetcode 70, Climbing Stairs, for the number N stair, it only has two way to get there from its previous state, either from the N-1 stair or N-2 stair. So for the number N stair, it is the sum of ways to get to N-1 stair and ways of N-2 stair.</p><p>underconstruction<br>bracktracing checkerboard/jump game<br>dp Palindromic Substring</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h3 id=&quot;Backtracing&quot;&gt;&lt;a href=&quot;#Backtracing&quot; class=&quot;headerlink&quot; title=&quot;Backtracing&quot;&gt;&lt;/a&gt;Backtracing&lt;/h3&gt;&lt;p&gt;Fibonacci sequence, this is a clas
+      
+    
+    </summary>
+    
+      <category term="algorithm" scheme="http://yoursite.com/categories/algorithm/"/>
+    
+    
+      <category term="DP" scheme="http://yoursite.com/tags/DP/"/>
+    
+  </entry>
   
   <entry>
     <title>Network IO Models</title>
